@@ -2,7 +2,6 @@ package com.tdfanta.game.view.setting
 
 import android.app.AlertDialog
 import android.content.SharedPreferences
-import androidx.preference.ListPreference
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import com.tdfanta.game.TDFantaApplication
@@ -19,8 +18,6 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
     private val mGameState: GameState
     private val mHighScores: HighScores
     private val mTutorialControl: TutorialControl
-    private val mListPreferenceKeys = ArrayList<String>()
-
     init {
         val factory: GameFactory = TDFantaApplication.getInstance().getGameFactory()
         mGameLoader = factory.getGameLoader()
@@ -35,8 +32,7 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
         migrateLegacyBackButtonPreference(sharedPreferences)
         sharedPreferences?.registerOnSharedPreferenceChangeListener(this)
 
-        registerListPreference(Preferences.THEME_MODE)
-        setupChangeThemeConfirmationDialog()
+        setupThemePreference()
         setupResetHighscores()
         setupResetTutorial()
     }
@@ -48,40 +44,95 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
     }
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
-        if (key != null && mListPreferenceKeys.contains(key)) {
-            updateListPreferenceSummary(key)
-        }
-
         if (key != null && Preferences.THEME_MODE == key) {
+            updateThemePreferenceSummary()
             mGameLoader.restart()
         }
     }
 
-    private fun registerListPreference(key: String) {
-        mListPreferenceKeys.add(key)
-        updateListPreferenceSummary(key)
+    private fun setupThemePreference() {
+        val preference = findPreference<Preference>(Preferences.THEME_MODE) ?: return
+        updateThemePreferenceSummary()
+
+        preference.onPreferenceClickListener = Preference.OnPreferenceClickListener {
+            showThemeDialog()
+            true
+        }
     }
 
-    private fun updateListPreferenceSummary(key: String) {
-        val preference = findPreference<ListPreference>(key) ?: return
-        preference.summary = preference.entry
+    private fun updateThemePreferenceSummary() {
+        val preference = findPreference<Preference>(Preferences.THEME_MODE) ?: return
+        val sharedPreferences = preferenceManager.sharedPreferences ?: return
+        val currentValue = getCurrentThemeModeValue(sharedPreferences)
+
+        val values = resources.getStringArray(R.array.theme_mode_entry_values)
+        val entries = resources.getStringArray(R.array.theme_mode_entries)
+        val index = values.indexOf(currentValue)
+        preference.summary = if (index >= 0) entries[index] else entries.firstOrNull() ?: ""
     }
 
-    private fun setupChangeThemeConfirmationDialog() {
-        val themePreference = findPreference<ListPreference>(Preferences.THEME_MODE) ?: return
-        themePreference.onPreferenceChangeListener = Preference.OnPreferenceChangeListener { preference, newValue ->
-            if (!mGameState.isGameStarted()) {
-                return@OnPreferenceChangeListener true
+    private fun showThemeDialog() {
+        val context = context ?: return
+        val sharedPreferences = preferenceManager.sharedPreferences ?: return
+
+        val values = resources.getStringArray(R.array.theme_mode_entry_values)
+        val entries = resources.getStringArray(R.array.theme_mode_entries)
+        val currentValue = getCurrentThemeModeValue(sharedPreferences)
+        val selectedIndex = values.indexOf(currentValue).let { if (it >= 0) it else 0 }
+
+        AlertDialog.Builder(context)
+            .setTitle(R.string.theme)
+            .setSingleChoiceItems(entries, selectedIndex) { dialog, which ->
+                dialog.dismiss()
+                val newValue = values.getOrNull(which) ?: return@setSingleChoiceItems
+                applyThemeModeSelection(newValue)
             }
+            .setNegativeButton(android.R.string.cancel, null)
+            .setIcon(R.drawable.settings)
+            .show()
+    }
 
-            AlertDialog.Builder(preference.context)
-                .setTitle(R.string.change_theme)
-                .setMessage(R.string.change_theme_warning)
-                .setPositiveButton(android.R.string.ok) { _, _ -> themePreference.value = newValue.toString() }
-                .setNegativeButton(android.R.string.cancel, null)
-                .setIcon(R.drawable.alert)
-                .show()
-            false
+    private fun applyThemeModeSelection(newValue: String) {
+        val sharedPreferences = preferenceManager.sharedPreferences ?: return
+        val currentValue = getCurrentThemeModeValue(sharedPreferences)
+
+        if (newValue == currentValue) {
+            return
+        }
+
+        if (!mGameState.isGameStarted()) {
+            persistThemeMode(newValue, sharedPreferences)
+            return
+        }
+
+        AlertDialog.Builder(requireContext())
+            .setTitle(R.string.change_theme)
+            .setMessage(R.string.change_theme_warning)
+            .setPositiveButton(android.R.string.ok) { _, _ ->
+                persistThemeMode(newValue, sharedPreferences)
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .setIcon(R.drawable.alert)
+            .show()
+    }
+
+    private fun persistThemeMode(newValue: String, sharedPreferences: SharedPreferences) {
+        sharedPreferences.edit()
+            .putString(Preferences.THEME_MODE, newValue)
+            .apply()
+    }
+
+    private fun getCurrentThemeModeValue(sharedPreferences: SharedPreferences): String {
+        val mode = sharedPreferences.getString(Preferences.THEME_MODE, null)
+        if (mode != null) {
+            return mode
+        }
+
+        val legacyIndex = sharedPreferences.getString(Preferences.THEME_INDEX, "0") ?: "0"
+        return if (legacyIndex == "1") {
+            Preferences.THEME_MODE_DARK
+        } else {
+            Preferences.THEME_MODE_LIGHT
         }
     }
 

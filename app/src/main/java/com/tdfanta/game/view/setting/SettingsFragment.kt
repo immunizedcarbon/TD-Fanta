@@ -9,19 +9,16 @@ import com.tdfanta.game.GameFactory
 import com.tdfanta.game.Preferences
 import com.tdfanta.game.R
 import com.tdfanta.game.business.game.GameLoader
-import com.tdfanta.game.business.game.GameState
 import com.tdfanta.game.business.game.HighScores
 import com.tdfanta.game.business.game.TutorialControl
 
 class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedPreferenceChangeListener {
     private val mGameLoader: GameLoader
-    private val mGameState: GameState
     private val mHighScores: HighScores
     private val mTutorialControl: TutorialControl
     init {
         val factory: GameFactory = TDFantaApplication.getInstance().getGameFactory()
         mGameLoader = factory.getGameLoader()
-        mGameState = factory.getGameState()
         mHighScores = factory.getHighScores()
         mTutorialControl = factory.getTutorialControl()
     }
@@ -46,7 +43,6 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
         if (key != null && Preferences.THEME_MODE == key) {
             updateThemePreferenceSummary()
-            mGameLoader.restart()
         }
     }
 
@@ -100,20 +96,7 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
             return
         }
 
-        if (!mGameState.isGameStarted()) {
-            persistThemeMode(newValue, sharedPreferences)
-            return
-        }
-
-        AlertDialog.Builder(requireContext())
-            .setTitle(R.string.change_theme)
-            .setMessage(R.string.change_theme_warning)
-            .setPositiveButton(android.R.string.ok) { _, _ ->
-                persistThemeMode(newValue, sharedPreferences)
-            }
-            .setNegativeButton(android.R.string.cancel, null)
-            .setIcon(R.drawable.alert)
-            .show()
+        persistThemeMode(newValue, sharedPreferences)
     }
 
     private fun persistThemeMode(newValue: String, sharedPreferences: SharedPreferences) {

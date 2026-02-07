@@ -17,7 +17,6 @@ import com.tdfanta.game.business.game.GameSpeed
 import com.tdfanta.game.business.game.ScoreBoard
 import com.tdfanta.game.business.tower.TowerSelector
 import com.tdfanta.game.business.wave.WaveManager
-import com.tdfanta.game.engine.theme.ThemeManager
 import com.tdfanta.game.util.StringUtils
 import com.tdfanta.game.view.BaseGameFragment
 
@@ -30,7 +29,6 @@ class HeaderFragment : BaseGameFragment(),
     private val mGameSpeed: GameSpeed
     private val mScoreBoard: ScoreBoard
     private val mTowerSelector: TowerSelector
-    private val mThemeManager: ThemeManager
 
     private lateinit var mHandler: Handler
 
@@ -55,7 +53,6 @@ class HeaderFragment : BaseGameFragment(),
         mWaveManager = factory.getWaveManager()
         mGameSpeed = factory.getSpeedManager()
         mTowerSelector = factory.getTowerSelector()
-        mThemeManager = factory.getThemeManager()
     }
 
     override fun onCreateView(
@@ -217,10 +214,7 @@ class HeaderFragment : BaseGameFragment(),
     }
 
     private fun updateButtonFastForwardActive() {
-        if (mGameSpeed.isFastForwardActive()) {
-            btnFastForwardActive.setTextColor(mThemeManager.getTheme().getColor(R.attr.textActiveColor))
-        } else {
-            btnFastForwardActive.setTextColor(mThemeManager.getTheme().getColor(R.attr.textColor))
-        }
+        // Use the same resolved color as the adjacent menu button to avoid any style/state mismatch.
+        btnFastForwardActive.setTextColor(btnMenu.currentTextColor)
     }
 }

@@ -1,0 +1,17 @@
+# Build and Gradle caches
+.gradle/
+.gradle-home/
+.kotlin/
+**/build/
+
+# IDE and local machine config
+.idea/
+*.iml
+local.properties
+
+# Test/debug runtime artifacts
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db

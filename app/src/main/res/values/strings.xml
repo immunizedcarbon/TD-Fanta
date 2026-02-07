@@ -64,6 +64,8 @@
     <string name="strategy_last">Last</string>
 
     <string name="theme_original">Original</string>
+    <string name="theme_system">System default</string>
+    <string name="theme_light">Light</string>
     <string name="theme_dark">Dark</string>
     <string name="theme_colour">Colour</string>
 

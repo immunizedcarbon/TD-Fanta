@@ -31,10 +31,11 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
 
     override fun onCreatePreferences(savedInstanceState: android.os.Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.settings, rootKey)
-        preferenceManager.sharedPreferences?.registerOnSharedPreferenceChangeListener(this)
+        val sharedPreferences = preferenceManager.sharedPreferences
+        migrateLegacyBackButtonPreference(sharedPreferences)
+        sharedPreferences?.registerOnSharedPreferenceChangeListener(this)
 
-        registerListPreference(Preferences.BACK_BUTTON_MODE)
-        registerListPreference(Preferences.THEME_INDEX)
+        registerListPreference(Preferences.THEME_MODE)
         setupChangeThemeConfirmationDialog()
         setupResetHighscores()
         setupResetTutorial()
@@ -51,7 +52,7 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
             updateListPreferenceSummary(key)
         }
 
-        if (key != null && Preferences.THEME_INDEX == key) {
+        if (key != null && Preferences.THEME_MODE == key) {
             mGameLoader.restart()
         }
     }
@@ -67,7 +68,7 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
     }
 
     private fun setupChangeThemeConfirmationDialog() {
-        val themePreference = findPreference<ListPreference>(Preferences.THEME_INDEX) ?: return
+        val themePreference = findPreference<ListPreference>(Preferences.THEME_MODE) ?: return
         themePreference.onPreferenceChangeListener = Preference.OnPreferenceChangeListener { preference, newValue ->
             if (!mGameState.isGameStarted()) {
                 return@OnPreferenceChangeListener true
@@ -114,6 +115,19 @@ class SettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedP
                 .show()
             true
         }
+    }
+
+    private fun migrateLegacyBackButtonPreference(sharedPreferences: SharedPreferences?) {
+        if (sharedPreferences == null || sharedPreferences.contains(Preferences.BACK_BUTTON_CLOSE_ENABLED)) {
+            return
+        }
+
+        val legacyMode = sharedPreferences.getString(Preferences.BACK_BUTTON_MODE, null) ?: return
+        val enabled = legacyMode == "ENABLED" || legacyMode == "TWICE"
+
+        sharedPreferences.edit()
+            .putBoolean(Preferences.BACK_BUTTON_CLOSE_ENABLED, enabled)
+            .apply()
     }
 
     companion object {

@@ -3,24 +3,22 @@
     android:icon="@drawable/settings"
     android:title="@string/settings">
     <ListPreference
-        android:key="theme_index"
-        android:defaultValue="0"
-        android:entries="@array/theme_entries"
-        android:entryValues="@array/theme_entry_values"
+        android:key="theme_mode"
+        android:defaultValue="@string/theme_mode_system_value"
+        android:entries="@array/theme_mode_entries"
+        android:entryValues="@array/theme_mode_entry_values"
         android:title="@string/theme" />
-    <SwitchPreferenceCompat
+    <CheckBoxPreference
         android:key="sound_enabled"
         android:defaultValue="true"
         android:title="@string/sound" />
-    <SwitchPreferenceCompat
+    <CheckBoxPreference
         android:key="transparent_menus_enabled"
         android:defaultValue="false"
         android:title="@string/transparent_menus" />
-    <ListPreference
-        android:key="back_button_mode"
-        android:defaultValue="@string/back_button_mode_disabled"
-        android:entries="@array/back_button_mode_entries"
-        android:entryValues="@array/back_button_mode_entry_values"
+    <CheckBoxPreference
+        android:key="back_button_close_enabled"
+        android:defaultValue="false"
         android:title="@string/back_button_mode" />
     <Preference
         android:key="start_tutorial"

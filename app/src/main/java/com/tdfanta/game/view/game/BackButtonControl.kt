@@ -41,6 +41,26 @@ class BackButtonControl(context: Context) {
     }
 
     private fun getBackButtonMode(): BackButtonMode {
+        if (mPreferences.contains(Preferences.BACK_BUTTON_CLOSE_ENABLED)) {
+            return getBackButtonModeFromCheckbox()
+        }
+
+        return getLegacyBackButtonMode()
+    }
+
+    private fun getBackButtonModeFromCheckbox(): BackButtonMode {
+        return try {
+            if (mPreferences.getBoolean(Preferences.BACK_BUTTON_CLOSE_ENABLED, false)) {
+                BackButtonMode.ENABLED
+            } else {
+                BackButtonMode.DISABLED
+            }
+        } catch (_: ClassCastException) {
+            BackButtonMode.DISABLED
+        }
+    }
+
+    private fun getLegacyBackButtonMode(): BackButtonMode {
         val backModeString = mPreferences.getString(Preferences.BACK_BUTTON_MODE, null)
         val modeName = backModeString ?: return BackButtonMode.DISABLED
 

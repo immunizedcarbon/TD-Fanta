@@ -45,6 +45,8 @@
     <string name="strategy_last">Letzter</string>
 
     <string name="theme_original">Original</string>
+    <string name="theme_system">Systemstandard</string>
+    <string name="theme_light">Hell</string>
     <string name="theme_dark">Dunkel</string>
 
     <string name="change_theme_warning">Willst du wirklich das Thema ändern? Das Spiel wird neu gestartet.</string>

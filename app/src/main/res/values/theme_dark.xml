@@ -55,7 +55,7 @@
         <item name="teleportTower">@drawable/teleport_tower_dk</item>
     </style>
 
-    <style name="DarkTheme.Game" parent="@android:style/Theme.NoTitleBar.Fullscreen">
+    <style name="DarkTheme.Game" parent="@android:style/Theme.NoTitleBar">
         <item name="android:windowAnimationStyle">@android:style/Animation</item>
         <item name="android:textAppearance">?android:attr/textAppearanceSmallInverse</item>
         <item name="android:textColor">#ffffff</item>

@@ -45,15 +45,11 @@ class GameActivity : BaseGameActivity() {
 
         setContentView(R.layout.activity_game)
 
-        findViewById<android.view.View>(android.R.id.content).setOnApplyWindowInsetsListener(ApplySafeInsetsHandler())
+        val rootView = findViewById<android.view.View>(R.id.activity_game_root)
+        rootView.setBackgroundColor(getGameFactory().getThemeManager().getTheme().getColor(R.attr.backgroundColor))
+        rootView.setOnApplyWindowInsetsListener(ApplySafeInsetsHandler())
 
-        val config = resources.configuration
-
-        if ((config.screenLayout and android.content.res.Configuration.SCREENLAYOUT_LONG_MASK) ==
-            android.content.res.Configuration.SCREENLAYOUT_LONG_YES
-        ) {
-            window.insetsController?.show(WindowInsets.Type.statusBars())
-        }
+        ensureSystemBarsVisible()
 
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
@@ -62,7 +58,15 @@ class GameActivity : BaseGameActivity() {
 
     override fun onResume() {
         super.onResume()
+        ensureSystemBarsVisible()
         mGameEngine.start()
+    }
+
+    override fun onWindowFocusChanged(hasFocus: Boolean) {
+        super.onWindowFocusChanged(hasFocus)
+        if (hasFocus) {
+            ensureSystemBarsVisible()
+        }
     }
 
     override fun onPause() {
@@ -103,5 +107,11 @@ class GameActivity : BaseGameActivity() {
         val toast = Toast.makeText(this, message, Toast.LENGTH_SHORT)
         toast.show()
         return toast
+    }
+
+    private fun ensureSystemBarsVisible() {
+        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
+        window.clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN)
+        window.insetsController?.show(WindowInsets.Type.statusBars())
     }
 }

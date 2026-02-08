@@ -64,6 +64,11 @@ abstract class BaseGameActivity : FragmentActivity(), ThemeManager.Listener {
         val controller = window.insetsController ?: return
         val backgroundColor = mThemeManager.getTheme().getColor(R.attr.backgroundColor)
         val lightBackground = Color.luminance(backgroundColor) >= 0.5f
+
+        // Keep icon contrast consistent by aligning system bar colors with the active game theme.
+        window.statusBarColor = backgroundColor
+        window.navigationBarColor = backgroundColor
+
         val mask = WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS or
             WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS
         val appearance = if (lightBackground) mask else 0
